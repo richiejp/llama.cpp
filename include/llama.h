@@ -175,6 +175,7 @@ extern "C" {
         LLAMA_POOLING_TYPE_CLS  = 2,
         LLAMA_POOLING_TYPE_LAST = 3,
         LLAMA_POOLING_TYPE_RANK = 4, // used by reranking models to attach the classification head to the graph
+        LLAMA_POOLING_TYPE_TOKEN_CLS = 5, // used by token classification models to attach the classification head to each token
     };
 
     enum llama_attention_type {

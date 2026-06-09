@@ -1,5 +1,6 @@
 #include "llama-graph.h"
 
+#include "llama-arch.h"
 #include "llama-impl.h"
 #include "llama-model.h"
 #include "llama-batch.h"
@@ -2949,6 +2950,17 @@ void llm_graph_context::build_pooling(
             {
                 cur = inp;
             } break;
+        case LLAMA_POOLING_TYPE_TOKEN_CLS:
+            {
+                cur = inp;
+
+                if (cls_out) {
+                    cur = ggml_mul_mat(ctx0, cls_out, cur);
+                    if (cls_out_b) {
+                        cur = ggml_add(ctx0, cur, cls_out_b);
+                    }
+                }
+            } break;
         case LLAMA_POOLING_TYPE_MEAN:
             {
                 ggml_tensor * inp_mean = build_inp_mean();
@@ -2967,7 +2979,7 @@ void llm_graph_context::build_pooling(
                     // https://github.com/huggingface/transformers/blob/main/src/transformers/models/modernbert/modular_modernbert.py#L1404-1411
                     ggml_tensor * inp_mean = build_inp_mean();
                     cur = ggml_mul_mat(ctx0, ggml_cont(ctx0, ggml_transpose(ctx0, inp)), inp_mean);
-                } else {
+                } else if (arch != LLM_ARCH_OPENAI_PRIVACY_FILTER){
                     ggml_tensor * inp_cls = build_inp_cls();
                     cur = ggml_get_rows(ctx0, inp, inp_cls);
                 }

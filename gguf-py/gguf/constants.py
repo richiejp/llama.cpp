@@ -4314,6 +4314,7 @@ class PoolingType(IntEnum):
     CLS  = 2
     LAST = 3
     RANK = 4
+    TOKEN_CLS = 5
 
 
 class GGMLQuantizationType(IntEnum):
