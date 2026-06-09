@@ -1287,6 +1287,7 @@ class TensorNameMap:
 
         MODEL_TENSOR.CLS_OUT: (
             "classifier.out_proj", # roberta
+            "score",               # openai-privacy-filter (token-classification head)
         ),
 
         MODEL_TENSOR.CLS_NORM: (

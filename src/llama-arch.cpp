@@ -137,6 +137,7 @@ static const std::map<llm_arch, const char *> LLM_ARCH_NAMES = {
     { LLM_ARCH_KIMI_LINEAR,      "kimi-linear"      },
     { LLM_ARCH_TALKIE,           "talkie"           },
     { LLM_ARCH_MELLUM,           "mellum"           },
+    { LLM_ARCH_OPENAI_PRIVACY_FILTER, "openai-privacy-filter" },
     { LLM_ARCH_UNKNOWN,          "(unknown)"        },
 };
 
