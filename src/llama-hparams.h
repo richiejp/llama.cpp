@@ -133,6 +133,9 @@ struct llama_hparams {
     float    yarn_attn_factor =  1.0f;
     float    yarn_beta_fast   = 32.0f;
     float    yarn_beta_slow   =  1.0f;
+    // round the YaRN interpolation-ramp corners to whole dims (original YaRN);
+    // false for models trained with rope_scaling.truncate = false (e.g. gpt-oss)
+    bool     yarn_truncate    = true;
 
     std::array<int, 4> rope_sections;
 

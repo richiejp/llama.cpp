@@ -209,6 +209,7 @@ class Keys:
         SCALING_YARN_ATTN_FACTOR  = "{arch}.rope.scaling.yarn_attn_factor"
         SCALING_YARN_BETA_FAST    = "{arch}.rope.scaling.yarn_beta_fast"
         SCALING_YARN_BETA_SLOW    = "{arch}.rope.scaling.yarn_beta_slow"
+        SCALING_YARN_TRUNCATE     = "{arch}.rope.scaling.yarn_truncate"
 
     class Split:
         LLM_KV_SPLIT_NO            = "split.no"

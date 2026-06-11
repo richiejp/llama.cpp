@@ -1011,6 +1011,9 @@ class GGUFWriter:
     def add_rope_scaling_yarn_beta_slow(self, value: float) -> None:
         self.add_float32(Keys.Rope.SCALING_YARN_BETA_SLOW.format(arch=self.arch), value)
 
+    def add_rope_scaling_yarn_truncate(self, value: bool) -> None:
+        self.add_bool(Keys.Rope.SCALING_YARN_TRUNCATE.format(arch=self.arch), value)
+
     def add_ssm_conv_kernel(self, value: int) -> None:
         self.add_uint32(Keys.SSM.CONV_KERNEL.format(arch=self.arch), value)
 

@@ -1137,6 +1137,7 @@ void llama_model_base::load_hparams(llama_model_loader & ml) {
 
     ml.get_key(LLM_KV_ROPE_SCALING_ATTN_FACTOR, hparams.rope_attn_factor, false);
     ml.get_key(LLM_KV_ROPE_SCALING_ALPHA,       hparams.rope_scaling_alpha, false);
+    ml.get_key(LLM_KV_ROPE_SCALING_YARN_TRUNCATE, hparams.yarn_truncate, false);
 
     // non-transformer models do not have attention heads
     if (hparams.n_head() > 0) {

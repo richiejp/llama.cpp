@@ -1230,6 +1230,11 @@ class TextModel(ModelBase):
                     self.gguf_writer.add_rope_scaling_yarn_beta_fast(yarn_beta_fast)
                 if (yarn_beta_slow := rope_params.get("beta_slow")) is not None:
                     self.gguf_writer.add_rope_scaling_yarn_beta_slow(yarn_beta_slow)
+                # transformers' YaRN truncates the interpolation-ramp corners to whole
+                # dims unless truncate is explicitly false (gpt-oss family); record it
+                # so the loader can match the reference frequencies exactly
+                if (yarn_truncate := rope_params.get("truncate")) is not None:
+                    self.gguf_writer.add_rope_scaling_yarn_truncate(yarn_truncate)
                 # self.gguf_writer.add_rope_scaling_yarn_log_mul(rope_params["mscale_all_dim"])
             elif rope_type == "su" or rope_type == "longrope":
                 rope_gguf_type = gguf.RopeScalingType.LONGROPE
