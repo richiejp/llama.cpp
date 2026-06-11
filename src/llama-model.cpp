@@ -261,6 +261,8 @@ static llama_model * llama_model_mapping(llm_arch arch, const llama_model_params
             return new llama_model_smollm3(params);
         case LLM_ARCH_OPENAI_MOE:
             return new llama_model_openai_moe(params);
+        case LLM_ARCH_OPENAI_PRIVACY_FILTER:
+            return new llama_model_openai_privacy_filter(params);
         case LLM_ARCH_FALCON_H1:
             return new llama_model_falcon_h1(params);
         case LLM_ARCH_LFM2:
@@ -1846,7 +1848,8 @@ void llama_model::print_info() const {
                 arch == LLM_ARCH_QWEN3MOE ||
                 arch == LLM_ARCH_OPENAI_MOE ||
                 arch == LLM_ARCH_QWEN3VLMOE ||
-                arch == LLM_ARCH_RND1) {
+                arch == LLM_ARCH_RND1 ||
+                arch == LLM_ARCH_OPENAI_PRIVACY_FILTER) {
             LLAMA_LOG_INFO("%s: n_ff_exp              = %d\n",     __func__, hparams.n_ff_exp);
         }
 
@@ -2411,6 +2414,10 @@ llama_rope_type llama_model_rope_type(const llama_model * model) {
         case LLM_ARCH_LLAMA_EMBED:
         case LLM_ARCH_MAINCODER:
         case LLM_ARCH_GLM_DSA:
+        // openai-privacy-filter uses the interleaved (GPT-J) rope layout
+        // (_apply_rotary_emb pairs x[..., ::2]/x[..., 1::2]), unlike gpt-oss
+        // (OPENAI_MOE) which uses NEOX rotate-half. See patches/README.md.
+        case LLM_ARCH_OPENAI_PRIVACY_FILTER:
             return LLAMA_ROPE_TYPE_NORM;
 
         // the pairs of head values are offset by n_rot/2
