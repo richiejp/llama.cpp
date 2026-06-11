@@ -14,6 +14,14 @@ void llama_model_openai_moe::load_arch_hparams(llama_model_loader & ml) {
     hparams.rope_freq_scale_train_swa = hparams.rope_freq_scale_train;
     ml.get_key(LLM_KV_ROPE_FREQ_BASE_SWA, hparams.rope_freq_base_train_swa, false);
 
+    // gpt-oss trains YaRN with truncate = false (the HF rope config). ggml's
+    // YaRN otherwise rounds the interpolation-ramp corners to whole dims,
+    // perturbing the transition-band frequencies. Force the un-truncated ramp
+    // here so published GGUFs (which predate the rope.scaling.yarn_truncate KV)
+    // match the reference; a GGUF that does carry the KV overrides this.
+    hparams.yarn_truncate = false;
+    ml.get_key(LLM_KV_ROPE_SCALING_YARN_TRUNCATE, hparams.yarn_truncate, false);
+
     switch (hparams.n_layer()) {
         case 24: type = LLM_TYPE_20B; break;
         case 36: type = LLM_TYPE_120B; break;
@@ -97,12 +105,14 @@ llama_model_openai_moe::graph::graph(const llama_model & model, const llm_graph_
                     n_rot, rope_type, n_ctx_orig, freq_base_l, freq_scale_l,
                     ext_factor, attn_factor, beta_fast, beta_slow
                     );
+            ggml_rope_set_yarn_truncate(Qcur, hparams.yarn_truncate);
 
             Kcur = ggml_rope_ext(
                     ctx0, Kcur, inp_pos, nullptr,
                     n_rot, rope_type, n_ctx_orig, freq_base_l, freq_scale_l,
                     ext_factor, attn_factor, beta_fast, beta_slow
                     );
+            ggml_rope_set_yarn_truncate(Kcur, hparams.yarn_truncate);
 
             cb(Qcur, "Qcur", il);
             cb(Kcur, "Kcur", il);
