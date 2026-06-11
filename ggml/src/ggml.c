@@ -4333,13 +4333,29 @@ static float ggml_rope_yarn_corr_dim(int n_dims, int n_ctx_orig, float n_rot, fl
 }
 
 void ggml_rope_yarn_corr_dims(
-    int n_dims, int n_ctx_orig, float freq_base, float beta_fast, float beta_slow, float dims[2]
+    int n_dims, int n_ctx_orig, float freq_base, float beta_fast, float beta_slow, bool truncate, float dims[2]
 ) {
     // start and end correction dims
-    float start = floorf(ggml_rope_yarn_corr_dim(n_dims, n_ctx_orig, beta_fast, freq_base));
-    float end   =  ceilf(ggml_rope_yarn_corr_dim(n_dims, n_ctx_orig, beta_slow, freq_base));
+    float start = ggml_rope_yarn_corr_dim(n_dims, n_ctx_orig, beta_fast, freq_base);
+    float end   = ggml_rope_yarn_corr_dim(n_dims, n_ctx_orig, beta_slow, freq_base);
+    if (truncate) {
+        start = floorf(start);
+        end   =  ceilf(end);
+    }
     dims[0] = MAX(0, start);
     dims[1] = MIN(n_dims - 1, end);
+}
+
+// the YaRN truncate flag lives in op_params[15]; it is stored inverted so the
+// zero-initialized default keeps the original (truncating) behavior
+void ggml_rope_set_yarn_truncate(struct ggml_tensor * a, bool truncate) {
+    GGML_ASSERT(a->op == GGML_OP_ROPE || a->op == GGML_OP_ROPE_BACK);
+    ggml_set_op_params_i32(a, 15, truncate ? 0 : 1);
+}
+
+bool ggml_rope_get_yarn_truncate(const struct ggml_tensor * a) {
+    GGML_ASSERT(a->op == GGML_OP_ROPE || a->op == GGML_OP_ROPE_BACK);
+    return ggml_get_op_params_i32(a, 15) == 0;
 }
 
 // ggml_rope_back
@@ -6737,6 +6753,7 @@ static void ggml_compute_backward(
                         mode, n_ctx_orig, freq_base, freq_scale, ext_factor, attn_factor, beta_fast, beta_slow) :
                     ggml_rope_multi_back(ctx, grad, src1, src2, n_dims, sections,
                         mode, n_ctx_orig, freq_base, freq_scale, ext_factor, attn_factor, beta_fast, beta_slow);
+                ggml_rope_set_yarn_truncate(rope_back, ggml_rope_get_yarn_truncate(tensor));
                 ggml_add_or_set(ctx, cgraph, isrc0, rope_back);
             }
             GGML_ASSERT((!src2 || !src2_needs_grads) && "gradients for freq factors not implemented");

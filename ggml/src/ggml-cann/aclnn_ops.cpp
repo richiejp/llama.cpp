@@ -2482,7 +2482,7 @@ static void aclnn_rope_cache_init(ggml_backend_cann_context & ctx,
     // TODO: check theta_scale_length and position_length.
     if (src2 == nullptr && ctx.rope_cache.cached &&
         ctx.rope_cache.equal(theta_scale_length, position_length, ext_factor, theta_scale, freq_scale, attn_factor,
-                             is_neox, indep_sects, mrope_used, is_imrope, sections)) {
+                             is_neox, indep_sects, mrope_used, is_imrope, sections, corr_dims)) {
         // use cache.
         return;
     }
@@ -2841,7 +2841,7 @@ static void aclnn_rope_cache_init(ggml_backend_cann_context & ctx,
     // Update cached value.
     ctx.rope_cache.cached = true;
     ctx.rope_cache.set(theta_scale_length, position_length, ext_factor, theta_scale, freq_scale, attn_factor, is_neox,
-                       indep_sects, mrope_used, is_imrope, sections);
+                       indep_sects, mrope_used, is_imrope, sections, corr_dims);
 }
 
 #ifdef __cplusplus
@@ -2890,7 +2890,7 @@ void ggml_cann_rope(ggml_backend_cann_context & ctx, ggml_tensor * dst) {
     const float theta_scale = powf(freq_base, -2.0f / n_dims);
 
     float corr_dims[2];
-    ggml_rope_yarn_corr_dims(n_dims, n_ctx_orig, freq_base, beta_fast, beta_slow, corr_dims);
+    ggml_rope_yarn_corr_dims(n_dims, n_ctx_orig, freq_base, beta_fast, beta_slow, ggml_rope_get_yarn_truncate(dst), corr_dims);
 
     bool       is_neox    = mode & GGML_ROPE_TYPE_NEOX;
     const bool is_imrope  = mode == GGML_ROPE_TYPE_IMROPE;  // qwen3vl apply interleaved mrope
@@ -3245,7 +3245,7 @@ void ggml_cann_rope_cache_preload(ggml_backend_cann_context & ctx, ggml_tensor *
     const float theta_scale = powf(freq_base, -2.0f / n_dims);
 
     float corr_dims[2];
-    ggml_rope_yarn_corr_dims(n_dims, n_ctx_orig, freq_base, beta_fast, beta_slow, corr_dims);
+    ggml_rope_yarn_corr_dims(n_dims, n_ctx_orig, freq_base, beta_fast, beta_slow, ggml_rope_get_yarn_truncate(dst), corr_dims);
 
     bool       is_neox    = mode & GGML_ROPE_TYPE_NEOX;
     const bool is_imrope  = mode == GGML_ROPE_TYPE_IMROPE;

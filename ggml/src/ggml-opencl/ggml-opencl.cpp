@@ -17227,13 +17227,15 @@ static void ggml_cl_rope(ggml_backend_t backend, const ggml_tensor * src0, const
     CL_CHECK(clSetKernelArg(kernel, 30, sizeof(float),    &attn_factor));
     CL_CHECK(clSetKernelArg(kernel, 31, sizeof(float),    &beta_fast));
     CL_CHECK(clSetKernelArg(kernel, 32, sizeof(float),    &beta_slow));
+    const int yarn_truncate = ggml_rope_get_yarn_truncate(dst) ? 1 : 0;
+    CL_CHECK(clSetKernelArg(kernel, 33, sizeof(int),      &yarn_truncate));
     // both mrope and vision kernels have sections
     if (is_mrope || is_vision) {
-        CL_CHECK(clSetKernelArg(kernel, 33, sizeof(int32_t)*4, &sections));
+        CL_CHECK(clSetKernelArg(kernel, 34, sizeof(int32_t)*4, &sections));
     }
     // only mrope has is_imrope
     if (is_mrope && !is_vision) {
-        CL_CHECK(clSetKernelArg(kernel, 34, sizeof(int), &is_imrope));
+        CL_CHECK(clSetKernelArg(kernel, 35, sizeof(int), &is_imrope));
     }
 
     size_t global_work_size[] = {(size_t)ne01*nth, (size_t)ne02, (size_t)ne03};

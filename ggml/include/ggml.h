@@ -1934,8 +1934,15 @@ extern "C" {
         "use ggml_rope_ext_inplace instead");
 
     // compute correction dims for YaRN RoPE scaling
+    // truncate: round the interpolation-ramp corners to whole dims (the original
+    // YaRN behavior); pass false for models trained with rope_scaling.truncate = false
     GGML_API void ggml_rope_yarn_corr_dims(
-        int n_dims, int n_ctx_orig, float freq_base, float beta_fast, float beta_slow, float dims[2]);
+        int n_dims, int n_ctx_orig, float freq_base, float beta_fast, float beta_slow, bool truncate, float dims[2]);
+
+    // toggle truncation of the YaRN interpolation-ramp correction dims for a rope
+    // operator created with ggml_rope_ext() and friends (default: enabled)
+    GGML_API void ggml_rope_set_yarn_truncate(struct ggml_tensor * a, bool truncate);
+    GGML_API bool ggml_rope_get_yarn_truncate(const struct ggml_tensor * a);
 
     // rotary position embedding backward, i.e compute dx from dy
     // a - dy

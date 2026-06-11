@@ -323,6 +323,7 @@ typedef struct {
     float    attn_factor;
     float    beta_fast;
     float    beta_slow;
+    int32_t  yarn_truncate;
     int32_t  sect_0;
     int32_t  sect_1;
     int32_t  sect_2;

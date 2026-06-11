@@ -591,7 +591,7 @@ void ggml_cuda_op_rope_impl(ggml_backend_cuda_context & ctx,
     }
 
     rope_corr_dims corr_dims;
-    ggml_rope_yarn_corr_dims(n_dims, n_ctx_orig, freq_base, beta_fast, beta_slow, corr_dims.v);
+    ggml_rope_yarn_corr_dims(n_dims, n_ctx_orig, freq_base, beta_fast, beta_slow, ggml_rope_get_yarn_truncate(dst), corr_dims.v);
 
     // compute
     if (is_neox) {

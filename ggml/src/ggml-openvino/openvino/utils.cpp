@@ -109,9 +109,14 @@ void ggml_rope_yarn_corr_dims(int n_dims,
                               float freq_base,
                               float beta_fast,
                               float beta_slow,
+                              bool truncate,
                               float dims[2]) {
-    float start = floorf(ggml_rope_yarn_corr_dim(n_dims, n_ctx_orig, beta_fast, freq_base));
-    float end = ceilf(ggml_rope_yarn_corr_dim(n_dims, n_ctx_orig, beta_slow, freq_base));
+    float start = ggml_rope_yarn_corr_dim(n_dims, n_ctx_orig, beta_fast, freq_base);
+    float end = ggml_rope_yarn_corr_dim(n_dims, n_ctx_orig, beta_slow, freq_base);
+    if (truncate) {
+        start = floorf(start);
+        end = ceilf(end);
+    }
     dims[0] = std::max(0.0f, start);
     dims[1] = std::min(static_cast<float>(n_dims - 1), end);
 }
@@ -180,7 +185,8 @@ std::pair<ov::Output<Node>, ov::Output<Node>> make_sin_cos(int32_t * rope_params
         theta = std::make_shared<ov::op::v1::Multiply>(inp_pos, factor_const);
     } else {
         float corr_dims[2];
-        ggml_rope_yarn_corr_dims(n_dims, n_ctx_orig, freq_base, beta_fast, beta_slow, corr_dims);
+        // op_params[15] stores the inverted YaRN truncate flag (see ggml_rope_set_yarn_truncate)
+        ggml_rope_yarn_corr_dims(n_dims, n_ctx_orig, freq_base, beta_fast, beta_slow, rope_params[15] == 0, corr_dims);
         factor[0] = 1.0f;
         for (size_t i = 1; i < factor.size(); i++) {
             factor[i] = theta_scale * factor[i - 1];
