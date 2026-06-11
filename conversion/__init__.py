@@ -90,6 +90,7 @@ TEXT_MODEL_MAP: dict[str, str] = {
     "GlmMoeDsaForCausalLM": "glm",
     "GlmOcrForConditionalGeneration": "glm",
     "GptOssForCausalLM": "gpt_oss",
+    "OpenAIPrivacyFilterForTokenClassification": "openai_privacy_filter",
     "GraniteForCausalLM": "granite",
     "GraniteMoeForCausalLM": "granite",
     "GraniteMoeHybridForCausalLM": "granite",
